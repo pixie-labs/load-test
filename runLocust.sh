@@ -9,8 +9,8 @@ SCRIPT_NAME=`basename "$0"`
 INITIAL_DELAY=1
 TARGET_HOST="$HOST"
 CLIENTS=2
-REQUESTS=10
 
+echo "HERE RUNNING"
 
 do_check() {
 
@@ -30,8 +30,8 @@ do_check() {
   if [ -n "${LOCUST_FILE:+1}" ]; then
   	echo "Locust file: $LOCUST_FILE"
   else
-  	LOCUST_FILE="locustfile.py" 
-  	echo "Default Locust file: $LOCUST_FILE" 
+  	LOCUST_FILE="locustfile.py"
+  	echo "Default Locust file: $LOCUST_FILE"
   fi
 }
 
@@ -39,14 +39,14 @@ do_exec() {
   sleep $INITIAL_DELAY
 
   # check if host is running
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${TARGET_HOST}) 
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${TARGET_HOST})
   if [ $STATUS -ne 200 ]; then
       echo "${TARGET_HOST} is not accessible"
       exit 1
   fi
 
-  echo "Will run $LOCUST_FILE against $TARGET_HOST. Spawning $CLIENTS clients and $REQUESTS total requests."
-  locust --host=http://$TARGET_HOST -f $LOCUST_FILE --clients=$CLIENTS --hatch-rate=5 --num-request=$REQUESTS --no-web --only-summary
+  echo "Will run $LOCUST_FILE against $TARGET_HOST. Spawning $CLIENTS users."
+  locust --host=http://$TARGET_HOST -f $LOCUST_FILE --users=$CLIENTS --spawn-rate=5 --headless --only-summary
   echo "done"
 }
 
@@ -59,7 +59,6 @@ Options:
   -d  Delay before starting
   -h  Target host url, e.g. http://localhost/
   -c  Number of clients (default 2)
-  -r  Number of requests (default 10)
 
 Description:
   Runs a Locust load simulation against specified host.
@@ -70,7 +69,7 @@ EOF
 
 
 
-while getopts ":d:h:c:r:" o; do
+while getopts ":d:h:c:" o; do
   case "${o}" in
     d)
         INITIAL_DELAY=${OPTARG}
@@ -83,10 +82,6 @@ while getopts ":d:h:c:r:" o; do
     c)
         CLIENTS=${OPTARG:-2}
         #echo $CLIENTS
-        ;;
-    r)
-        REQUESTS=${OPTARG:-10}
-        #echo $REQUESTS
         ;;
     *)
         do_usage
