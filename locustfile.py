@@ -8,9 +8,12 @@ class WebTasks(TaskSet):
 
     @task
     def load(self):
-        base64string = base64.encodebytes(b'user:password').replace(b'\n', b'')
+        base64string = base64.encodebytes(b'user:password').replace(b'\n', b'').decode()
 
         catalogue = self.client.get("/catalogue").json()
+        # This sometimes fails under load.
+        if "error" in catalogue:
+            return
         category_item = choice(catalogue)
         item_id = category_item["id"]
 
